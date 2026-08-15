@@ -1,0 +1,97 @@
+.trust-gauge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.trust-gauge__ring {
+  --size: 96px;
+  --thickness: 8px;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: conic-gradient(
+    var(--ring-color) var(--gauge-angle),
+    var(--color-line) var(--gauge-angle)
+  );
+}
+
+.trust-gauge--lg .trust-gauge__ring {
+  --size: 140px;
+  --thickness: 10px;
+}
+
+.trust-gauge--sm .trust-gauge__ring {
+  --size: 56px;
+  --thickness: 5px;
+}
+
+.trust-gauge__ring--high {
+  --ring-color: var(--color-trust-high);
+}
+.trust-gauge__ring--mid {
+  --ring-color: var(--color-trust-mid);
+}
+.trust-gauge__ring--low {
+  --ring-color: var(--color-trust-low);
+}
+
+.trust-gauge__face {
+  width: calc(var(--size) - var(--thickness) * 2);
+  height: calc(var(--size) - var(--thickness) * 2);
+  border-radius: 50%;
+  background: var(--color-paper-raised);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.trust-gauge__score {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.6rem;
+  color: var(--color-ink);
+}
+
+.trust-gauge--sm .trust-gauge__score {
+  font-size: 1rem;
+}
+
+.trust-gauge--lg .trust-gauge__score {
+  font-size: 2.2rem;
+}
+
+.trust-gauge__scale {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--color-ink-soft);
+  margin-top: 2px;
+}
+
+.trust-gauge__badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.trust-gauge__badge--high {
+  color: var(--color-trust-high);
+  background: var(--color-trust-high-tint);
+}
+.trust-gauge__badge--mid {
+  color: var(--color-trust-mid);
+  background: var(--color-trust-mid-tint);
+}
+.trust-gauge__badge--low {
+  color: var(--color-trust-low);
+  background: var(--color-trust-low-tint);
+}

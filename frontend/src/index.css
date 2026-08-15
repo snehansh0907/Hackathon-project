@@ -1,0 +1,172 @@
+/* ==========================================================================
+   ToiletTrust — Design Tokens
+   Civic sanitation trust index. Palette pulls from municipal signage:
+   deep teal (water/civic authority) as brand, marigold/brick as the
+   trust-status scale (fits Indian civic signage without leaning on the
+   generic terracotta/cream "AI template" palette).
+   ========================================================================== */
+
+:root {
+  /* Color */
+  --color-ink: #10262b;
+  --color-ink-soft: #3d5259;
+  --color-paper: #f3f5f1;
+  --color-paper-raised: #ffffff;
+  --color-line: #d8ded9;
+
+  --color-brand: #0e6e5d;
+  --color-brand-dark: #0a4d41;
+  --color-brand-tint: #e2efec;
+
+  --color-trust-high: #2f8f6b;
+  --color-trust-high-tint: #e4f3ec;
+  --color-trust-mid: #c9861a;
+  --color-trust-mid-tint: #faefdc;
+  --color-trust-low: #bd4636;
+  --color-trust-low-tint: #f8e5e1;
+
+  /* Type */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Layout */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-card: 0 1px 2px rgba(16, 38, 43, 0.06), 0 6px 20px rgba(16, 38, 43, 0.06);
+  --nav-height: 60px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: var(--color-brand);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--color-brand-dark);
+}
+
+.btn-secondary {
+  background: var(--color-paper-raised);
+  border-color: var(--color-line);
+  color: var(--color-ink);
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-brand);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+.state-message {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--color-ink-soft);
+  font-size: 0.95rem;
+}

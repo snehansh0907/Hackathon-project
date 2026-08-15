@@ -1,0 +1,73 @@
+.facility-page {
+  flex: 1;
+  padding: 32px 0 60px;
+}
+
+.facility-layout {
+  max-width: 700px;
+}
+
+.facility-back {
+  display: inline-block;
+  color: var(--color-ink-soft);
+  text-decoration: none;
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+}
+
+.facility-back:hover {
+  color: var(--color-brand);
+}
+
+.facility-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--color-line);
+  flex-wrap: wrap;
+}
+
+.facility-name {
+  font-size: 1.8rem;
+}
+
+.facility-address {
+  color: var(--color-ink-soft);
+  margin-top: 8px;
+  font-size: 0.95rem;
+}
+
+.facility-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 20px;
+  margin: 28px 0;
+}
+
+.facility-stat {
+  background: var(--color-paper-raised);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.facility-stat p {
+  margin-top: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.facility-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.facility-actions-note {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--color-ink-soft);
+}

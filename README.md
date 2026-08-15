@@ -1,4 +1,3 @@
-# Hackathon-project
 # ToiletTrust
 
 > **A real-time trust index for public toilets and sanitation facilities.**
@@ -9,7 +8,9 @@
 
 ## 2. One-line Description
 
-A public toilet and sanitation platform that combines citizen reports, facility information, and recent conditions into a transparent Trust Score to help users find reliable facilities and authorities identify problems.
+A public toilet and sanitation platform that combines citizen reports, location verification, evidence analysis, recent conditions, and official maintenance records into a transparent Trust Score.
+
+---
 
 ## 3. Problem
 
@@ -20,7 +21,9 @@ ToiletTrust addresses the gap between:
 - what official records say about a public toilet, and
 - what citizens are currently experiencing.
 
-The project focuses on making facility condition more transparent and helping authorities identify facilities that may require attention.
+The system also needs to distinguish genuine, recent reports from duplicate, recycled, or potentially unreliable evidence.
+
+---
 
 ## 4. Solution
 
@@ -29,36 +32,105 @@ ToiletTrust provides:
 1. A map of public toilet facilities.
 2. Facility details and a Trust Score.
 3. Citizen verification and reporting.
-4. Recent-condition information.
-5. Detection of potential discrepancies between official records and citizen reports.
-6. An authority dashboard for prioritizing issues.
+4. Location-based check-in.
+5. Granular condition reporting.
+6. Evidence submission through the camera.
+7. Multi-signal evidence confidence.
+8. Detection of potential discrepancies between official records and citizen reports.
+9. Automatic repair-priority calculation.
+10. An authority dashboard for prioritizing issues.
+11. Post-maintenance community re-verification.
 
-The Trust Score is intended to be transparent and rule-based rather than dependent on a machine-learning model.
+The Trust Score remains transparent and rule-based. AI is used for evidence analysis and issue detection, not as the sole source of truth.
+
+---
 
 ## 5. Key Features
+
+### Citizen Features
 
 - Public toilet map
 - Toilet/facility details
 - Trust Score
 - Citizen condition reports
+- Location/proximity verification
+- Check-in timestamp
 - Functionality reporting
 - Water-availability reporting
 - Cleanliness rating
-- Location/proximity verification
+- Flush/functionality rating
+- Lighting rating
+- Hygiene rating
 - Recent-report information
-- Potential discrepancy detection
-- Authority/admin dashboard
-- Issue priority and status workflow
+- Current facility status
 
-### Nice-to-have features
+### Evidence Verification
 
-The following are optional and may not be part of the MVP:
+Evidence is treated as supporting evidence rather than absolute proof.
 
-- Photo evidence
-- AI-assisted complaint summarization/categorization
-- Notifications
-- User reputation
-- Advanced analytics
+The MVP can combine:
+
+- Camera-based capture during a report
+- GPS consistency
+- Check-in timestamp
+- Evidence timestamp
+- Image issue detection
+- Image/perceptual-hash duplicate detection
+- Facility/evidence visual consistency
+- Multiple independent reports
+
+The system produces an **Evidence Confidence Score** instead of claiming that an image is definitely real or fake.
+
+### Crowd Verification
+
+Multiple independent reports about the same issue increase confidence.
+
+For example:
+
+```text
+1 recent report
+      ↓
+Low confidence
+
+Multiple independent reports
+      ↓
+Higher confidence
+
+Multiple reports + consistent evidence
+      ↓
+High confidence
+```
+
+Repeated reports of the same issue should be treated as multiple confirmations of one incident rather than blindly counting them as separate problems.
+
+### Trust & Discrepancy Engine
+
+- Aggregates recent citizen reports
+- Calculates crowd confidence
+- Calculates facility Trust Score
+- Compares crowd reports with official maintenance records
+- Detects potential discrepancies
+- Calculates repair priority
+- Tracks issue status
+
+### Municipality Features
+
+- View facilities and current status
+- View citizen reports
+- View evidence confidence
+- View high-priority facilities
+- Compare citizen reports with official maintenance records
+- Track reported/resolved issues
+- Mark maintenance progress
+- Trigger/review post-maintenance verification
+
+### Re-Verification
+
+When an official maintenance record is marked as resolved, the facility can be re-verified by citizens.
+
+If the same issue continues to receive recent, credible reports, the issue can be flagged again.
+
+---
 
 ## 6. Demo
 
@@ -66,17 +138,19 @@ The following are optional and may not be part of the MVP:
 
 `[Live Demo URL]`
 
+---
+
 ## 7. Screenshots
 
 ### Home / Map
 
 `[Screenshot placeholder]`
 
-### Toilet Details
+### Toilet Details / Trust Score
 
 `[Screenshot placeholder]`
 
-### Report Form
+### Report Form / Evidence
 
 `[Screenshot placeholder]`
 
@@ -84,19 +158,42 @@ The following are optional and may not be part of the MVP:
 
 `[Screenshot placeholder]`
 
+### Discrepancy / Priority View
+
+`[Screenshot placeholder]`
+
+---
+
 ## 8. Tech Stack
 
 ### Frontend
 
+**Existing frontend remains unchanged.**
+
 - React
 - Vite
-- CSS / Tailwind CSS *(depending on the final implementation)*
+- CSS / Tailwind CSS *(depending on the existing implementation)*
 
-### Backend / Database
+### Backend
 
-- Supabase
+- Node.js
+- Express.js
+- REST API
+
+### Database
+
 - PostgreSQL
-- Supabase Authentication
+- PostGIS for location-based queries
+
+### Authentication
+
+- JWT
+
+### Evidence / AI Service
+
+- Python
+- FastAPI
+- Computer Vision / image-analysis model: `[FINAL MODEL TO BE SELECTED]`
 
 ### Maps and Location
 
@@ -104,57 +201,63 @@ The following are optional and may not be part of the MVP:
 - OpenStreetMap
 - Browser Geolocation API
 
+### Image Storage
+
+`[IMAGE STORAGE PROVIDER]`
+
 ### Deployment
 
-- Vercel
+- Frontend: `[FRONTEND HOST]`
+- Backend: `[BACKEND HOST]`
+- AI Service: `[AI SERVICE HOST]`
+- Database: `[DATABASE HOST]`
 
 ### Version Control
 
 - GitHub
 
-### Optional AI
-
-An AI service may be used for optional complaint categorization or summarization if implemented.
-
-> **Note:** The final AI provider/API has not been specified.
+---
 
 ## 9. Architecture Overview
 
-The application uses a simple architecture designed for a hackathon.
+The existing React/Vite frontend is kept unchanged from a UI perspective. The backend layer is moved to a dedicated Node.js/Express API.
 
 ```text
-                    USER
-                      |
-                      v
-             +------------------+
-             | React + Vite     |
-             | Frontend         |
-             +--------+---------+
-                      |
-          +-----------+-----------+
-          |           |           |
-          v           v           v
-      Leaflet     Browser GPS   Supabase
-      + OSM                       |
-                                  |
-                     +------------+------------+
-                     |                         |
-                     v                         v
-                PostgreSQL              Authentication
-                     |
-          +----------+----------+
-          |          |           |
-          v          v           v
-       Toilets    Reports    Maintenance
+                         USER
+                           |
+                           v
+                 +---------------------+
+                 | Existing React/Vite |
+                 |      Frontend       |
+                 +----------+----------+
+                            |
+                         REST API
+                            |
+                            v
+                 +---------------------+
+                 | Node.js + Express   |
+                 |      Backend        |
+                 +----------+----------+
+                            |
+              +-------------+-------------+
+              |             |             |
+              v             v             v
+        PostgreSQL       Evidence       Auth
+         + PostGIS       Service        / JWT
+              |          FastAPI
+              |             |
+              |             v
+              |       Evidence Analysis
+              |             |
+              +------+------+
                      |
                      v
-               Trust Score
+            Trust / Discrepancy Engine
                      |
              +-------+-------+
              |               |
              v               v
-       Discrepancy       Priority
-        Detection       Calculation
+        Trust Score      Priority Score
              |               |
              +-------+-------+
                      |
@@ -162,344 +265,681 @@ The application uses a simple architecture designed for a hackathon.
               Admin Dashboard
 ```
 
-The project does not require a separate custom Node.js/Express backend for the planned MVP. Supabase provides the database, authentication, and backend services.
+### Evidence Verification Flow
+
+```text
+Camera Capture
+      |
+      v
+GPS + Check-in Validation
+      |
+      v
+Image Analysis
+      |
+      +----> Issue Detection
+      |
+      +----> Duplicate Detection
+      |
+      +----> Facility Consistency
+      |
+      v
+Evidence Confidence
+      |
+      v
+Crowd Verification
+      |
+      v
+Trust / Discrepancy Engine
+```
+
+### Important Design Principle
+
+The system does **not** attempt to determine whether a single image is absolutely genuine.
+
+Instead, it combines several signals:
+
+```text
+GPS
++
+Timestamp
++
+Camera Capture
++
+Image Analysis
++
+Duplicate Detection
++
+Facility Consistency
++
+Independent Reports
++
+Official Records
+```
+
+to calculate confidence.
+
+---
 
 ## 10. Project Structure
 
-The planned project structure is:
+The existing frontend structure should remain unchanged.
 
 ```text
 toilet-trust/
 |
-├── public/
+├── frontend/                    # Existing frontend — unchanged
+|   └── [EXISTING FRONTEND STRUCTURE]
 |
-├── src/
+├── backend/
+|   ├── src/
+|   |   ├── controllers/
+|   |   ├── routes/
+|   |   ├── models/
+|   |   ├── services/
+|   |   ├── middleware/
+|   |   ├── utils/
+|   |   └── app.[js/ts]
 |   |
-|   ├── components/
-|   |   ├── Navbar.jsx
-|   |   ├── Map.jsx
-|   |   ├── ToiletCard.jsx
-|   |   ├── TrustScore.jsx
-|   |   ├── StatusBadge.jsx
-|   |   └── ReportForm.jsx
-|   |
-|   ├── pages/
-|   |   ├── Home.jsx
-|   |   ├── ToiletDetails.jsx
-|   |   ├── Report.jsx
-|   |   ├── Login.jsx
-|   |   └── AdminDashboard.jsx
-|   |
-|   ├── services/
-|   |   ├── supabase.js
-|   |   ├── toiletService.js
-|   |   ├── reportService.js
-|   |   └── trustScore.js
-|   |
-|   ├── hooks/
-|   |   └── useLocation.js
-|   |
-|   ├── utils/
-|   |   ├── distance.js
-|   |   └── priority.js
-|   |
-|   ├── App.jsx
-|   ├── main.jsx
-|   └── index.css
+|   ├── .env.example
+|   └── package.json
 |
-├── .env
-├── package.json
+├── ai-service/
+|   ├── app/
+|   |   ├── routes/
+|   |   ├── services/
+|   |   └── models/
+|   |
+|   ├── requirements.txt
+|   └── main.py
+|
 └── README.md
 ```
 
-> **Note:** This is the planned structure. Update it if the final implementation differs.
+---
 
 ## 11. Prerequisites
 
-The exact prerequisites for the final project have not been formally specified.
-
-Expected prerequisites for the planned architecture include:
+Expected prerequisites:
 
 - Node.js
 - npm
+- PostgreSQL
+- PostGIS
+- Python 3.x
+- pip
 - Git
-- A GitHub account
-- A Supabase project
 - A modern web browser
+- `[IMAGE STORAGE REQUIREMENT]`
+- `[MAP API / CONFIGURATION REQUIREMENT IF APPLICABLE]`
 
-> **Placeholder:** Add exact Node.js/npm versions once finalized.
+> Add exact versions once the implementation is finalized.
+
+---
 
 ## 12. Installation
 
-Clone the repository:
+### Clone the Repository
 
 ```bash
 git clone <REPOSITORY_URL>
-```
-
-Enter the project directory:
-
-```bash
 cd toilet-trust
 ```
 
-Install frontend dependencies:
+### Install Backend Dependencies
 
 ```bash
+cd backend
 npm install
 ```
 
-Create the environment file:
-
-```text
-.env
-```
-
-Add the required environment variables described below.
-
-Then start the development server:
+### Install AI Service Dependencies
 
 ```bash
-npm run dev
+cd ../ai-service
+pip install -r requirements.txt
 ```
 
-> **Note:** Replace `<REPOSITORY_URL>` with the actual repository URL.
+### Install Existing Frontend Dependencies
+
+```bash
+cd ../frontend
+npm install
+```
+
+The frontend UI/components are not being replaced. Only its backend data/API integration should point to the new backend where required.
+
+---
 
 ## 13. Environment Variables
 
-The planned application requires Supabase connection information.
+### Backend
 
-Create a `.env` file in the project root.
+Create `backend/.env`:
 
 ```env
-VITE_SUPABASE_URL=<YOUR_SUPABASE_URL>
-VITE_SUPABASE_ANON_KEY=<YOUR_SUPABASE_ANON_KEY>
+PORT=<BACKEND_PORT>
+DATABASE_URL=<POSTGRESQL_CONNECTION_STRING>
+JWT_SECRET=<JWT_SECRET>
+AI_SERVICE_URL=<AI_SERVICE_URL>
+IMAGE_STORAGE_URL=<IMAGE_STORAGE_URL>
+IMAGE_STORAGE_API_KEY=<IMAGE_STORAGE_API_KEY>
 ```
 
-> **Important:** Do not commit private/secret keys to GitHub.
+### Frontend
 
-> **Placeholder:** Add any additional environment variables if external AI services or other services are implemented.
+Keep the existing frontend environment variables required by the current implementation.
+
+```env
+[EXISTING_FRONTEND_ENVIRONMENT_VARIABLES]
+```
+
+### AI Service
+
+```env
+PORT=<AI_SERVICE_PORT>
+```
+
+Add model/provider-specific variables if the final implementation requires them.
+
+> Never commit private secrets to GitHub.
+
+---
 
 ## 14. How to Run Frontend
 
-From the project root:
+From the existing frontend directory:
 
 ```bash
+cd frontend
 npm install
 npm run dev
 ```
 
-Vite will provide a local development URL.
+> If the current repository keeps the React/Vite app in the project root instead of `/frontend`, use the existing project command/location.
 
-> **Placeholder:** Add the exact local URL after the project is configured.
-
-Example:
-
-```text
-http://localhost:<PORT>
-```
+---
 
 ## 15. How to Run Backend
 
-There is no separate custom backend server in the planned MVP architecture.
-
-Supabase acts as the backend service and provides:
-
-- PostgreSQL database
-- Authentication
-- Database access/API
-- Security policies
-
-Therefore, there is no separate command such as:
-
 ```bash
-npm run server
+cd backend
+npm install
+npm run dev
 ```
 
-for the planned architecture.
+Expected backend URL:
 
-> **Placeholder:** If a separate backend is added later, document its setup and start command here.
+```text
+http://localhost:<BACKEND_PORT>
+```
+
+The backend provides REST endpoints for:
+
+- Authentication
+- Facilities
+- Reports
+- Evidence
+- Maintenance
+- Trust Scores
+- Discrepancies
+- Priority issues
+
+---
 
 ## 16. Database Setup
 
-The planned database uses Supabase PostgreSQL.
+The MVP uses **PostgreSQL + PostGIS**.
 
-### Main tables
+Enable PostGIS:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS postgis;
+```
+
+### Simplified MVP Schema
+
+The database intentionally uses only **six main tables**.
+
+### 1. `users`
+
+Stores citizens, officials, and contractors.
 
 ```text
-profiles
-toilets
+users
+----------------
+id                  PK
+name
+email
+password_hash
+role                citizen / official / contractor / admin
+reputation_score
+created_at
+```
+
+### 2. `facilities`
+
+Stores public toilet information.
+
+```text
+facilities
+----------------
+id                  PK
+name
+address
+latitude
+longitude
+ward
+contractor_id       FK -> users.id
+is_active
+created_at
+```
+
+### 3. `reports`
+
+Stores check-ins, citizen ratings, and issue reports.
+
+```text
 reports
-maintenance_records
-issues
+----------------
+id                  PK
+user_id             FK -> users.id
+facility_id         FK -> facilities.id
+
+latitude
+longitude
+checkin_time
+
+cleanliness
+water
+flush
+lighting
+hygiene
+
+issue_type
+description
+status
+created_at
 ```
 
-### Relationships
+### 4. `evidence`
+
+Stores evidence metadata and evidence-analysis results.
 
 ```text
-profiles
-   |
-   +---- reports
-            |
-            +---- toilets
-                    |
-                    +---- maintenance_records
-                    |
-                    +---- issues
+evidence
+----------------
+id                  PK
+report_id           FK -> reports.id
+image_url
+captured_at
+image_hash
+detected_issue
+ai_confidence
+gps_match
+duplicate_flag
+created_at
 ```
 
-### Setup
+### 5. `maintenance`
 
-> **Placeholder:** Add the final Supabase SQL schema/migration file path here.
-
-For example:
+Stores official maintenance information.
 
 ```text
-supabase/schema.sql
+maintenance
+----------------
+id                  PK
+facility_id         FK -> facilities.id
+issue_type
+description
+status              reported / repairing / resolved
+contractor_id       FK -> users.id
+reported_at
+resolved_at
+official_note
 ```
 
-Once the schema is finalized, run/apply the SQL in the Supabase SQL Editor or through the project's chosen migration workflow.
+### 6. `trust_scores`
 
-### Demo data
+Stores the calculated facility-level results.
 
-The MVP is expected to use a limited set of realistic public toilet/facility records for demonstration.
+```text
+trust_scores
+----------------
+id                  PK
+facility_id         FK -> facilities.id
 
-> **Placeholder:** Add the final seed-data file or instructions here.
+trust_score
+discrepancy_score
+priority_score
+crowd_confidence
+official_status
+score_breakdown
+last_updated
+```
+
+### Relationship Overview
+
+```text
+users
+  |
+  +---- reports ---- facilities
+  |         |
+  |         +---- evidence
+  |
+  +---- maintenance ---- facilities
+                              |
+                              v
+                         trust_scores
+```
+
+> `[ADD FINAL SQL MIGRATION/SCHEMA FILE PATH HERE]`
+
+---
 
 ## 17. API Documentation
 
-The planned architecture does not include a custom REST API server.
+### Base URL
 
-The frontend communicates with Supabase for database and authentication operations.
+```text
+<BACKEND_BASE_URL>
+```
 
-### Main data operations
+### Authentication
 
-#### Toilets
+#### Register
 
-Used to:
+```http
+POST /api/auth/register
+```
 
-- Fetch public toilet/facility information
-- Display facilities on the map
-- Display facility details
+#### Login
 
-#### Reports
+```http
+POST /api/auth/login
+```
 
-Used to:
+---
 
-- Submit citizen reports
-- Retrieve recent reports
-- Support Trust Score calculations
+### Facilities
 
-#### Maintenance Records
+#### Get Nearby Facilities
 
-Used to:
+```http
+GET /api/facilities/nearby?latitude=<LAT>&longitude=<LONG>
+```
 
-- Store official maintenance/status information
-- Support discrepancy detection
+#### Get Facility
 
-#### Issues
+```http
+GET /api/facilities/:id
+```
 
-Used to:
+#### Get Facility Trust Score
 
-- Store identified issues
-- Track priority
-- Track issue status
+```http
+GET /api/facilities/:id/trust-score
+```
 
-#### Authentication
+---
 
-Supabase Authentication is used for user authentication.
+### Reports
 
-> **Placeholder:** Add exact Supabase queries/API references once the implementation is finalized.
+#### Create Report
+
+```http
+POST /api/reports
+```
+
+Example:
+
+```json
+{
+  "facility_id": "<FACILITY_ID>",
+  "latitude": "<LATITUDE>",
+  "longitude": "<LONGITUDE>",
+  "cleanliness": 2,
+  "water": 1,
+  "flush": 5,
+  "lighting": 4,
+  "hygiene": 2,
+  "issue_type": "water_unavailable",
+  "description": "Water is currently unavailable."
+}
+```
+
+#### Get Facility Reports
+
+```http
+GET /api/facilities/:id/reports
+```
+
+---
+
+### Evidence
+
+#### Submit Evidence
+
+```http
+POST /api/reports/:id/evidence
+```
+
+The backend should validate the report/check-in context and send the evidence to the AI service for analysis.
+
+Possible analysis output:
+
+```json
+{
+  "detected_issue": "water_unavailable",
+  "ai_confidence": 0.91,
+  "gps_match": true,
+  "duplicate_flag": false
+}
+```
+
+---
+
+### Maintenance
+
+#### Get Maintenance Records
+
+```http
+GET /api/facilities/:id/maintenance
+```
+
+#### Update Maintenance Status
+
+```http
+PATCH /api/maintenance/:id
+```
+
+---
+
+### Trust & Discrepancy
+
+#### Get Trust Score
+
+```http
+GET /api/facilities/:id/trust-score
+```
+
+#### Get High-Priority Facilities
+
+```http
+GET /api/admin/priority-facilities
+```
+
+#### Get Discrepancies
+
+```http
+GET /api/admin/discrepancies
+```
+
+> Add the final request/response schemas once the backend implementation is complete.
+
+---
 
 ## 18. Testing
 
-> **Placeholder:** Add the final testing approach once implemented.
+### Backend
 
-At minimum, the MVP should be manually tested for the following flow:
-
-```text
-Open application
-      |
-      v
-View toilet map
-      |
-      v
-Open toilet details
-      |
-      v
-View Trust Score
-      |
-      v
-Submit citizen report
-      |
-      v
-Report is stored
-      |
-      v
-Trust Score updates
-      |
-      v
-Potential discrepancy is detected
-      |
-      v
-Admin sees the issue
+```bash
+cd backend
+npm test
 ```
 
-Also test:
+### AI Service
 
-- Invalid report values
-- Location/proximity verification
-- Citizen access
-- Admin access
+```bash
+cd ai-service
+pytest
+```
+
+### Core MVP Test Cases
+
+- Valid user authentication
+- Invalid authentication
+- Valid facility check-in
+- Check-in outside facility radius
+- Valid report submission
+- Invalid rating values
+- Evidence upload
+- GPS/evidence consistency
+- Duplicate/recycled evidence
+- Issue detection confidence
+- Multiple independent reports
+- Crowd confidence calculation
+- Official vs crowd discrepancy
+- Trust Score calculation
+- Priority Score calculation
+- Maintenance resolution
+- Post-maintenance re-verification
+- Admin authorization
 - Database permissions
-- Empty/failed data requests
-- Mobile/responsive layout
+
+### End-to-End Demo Flow
+
+```text
+Open Application
+       |
+       v
+View Toilet Map
+       |
+       v
+Open Facility
+       |
+       v
+Check In
+       |
+       v
+Submit Rating + Issue
+       |
+       v
+Capture Evidence
+       |
+       v
+Evidence Analysis
+       |
+       v
+Trust Score Updates
+       |
+       v
+Official Record Comparison
+       |
+       v
+Discrepancy Detected
+       |
+       v
+Priority Score Generated
+       |
+       v
+Admin Dashboard
+       |
+       v
+Maintenance
+       |
+       v
+Community Re-Verification
+```
+
+---
 
 ## 19. Deployment
 
-The planned frontend deployment platform is **Vercel**.
-
-Expected deployment flow:
+### Planned Deployment
 
 ```text
 GitHub
-   |
-   v
-Vercel
-   |
-   v
-React/Vite application
-   |
-   v
-Supabase
+  |
+  +--------------------+
+  |                    |
+  v                    v
+Frontend              Backend
+Vercel                [BACKEND HOST]
+                           |
+                 +---------+---------+
+                 |                   |
+                 v                   v
+             PostgreSQL          AI Service
+             + PostGIS           [AI HOST]
 ```
 
-### Deployment steps
+### Frontend
 
-> **Placeholder:** Add the final deployment URL and exact Vercel configuration after deployment.
+The existing React/Vite frontend can continue to be deployed on Vercel.
 
-At a high level:
+### Backend
 
-1. Push the project to GitHub.
-2. Connect the repository to Vercel.
-3. Configure the required environment variables.
-4. Deploy the application.
-5. Verify the deployed application can communicate with Supabase.
+Deploy the Node.js/Express API to:
+
+```text
+[BACKEND HOST]
+```
+
+### AI Service
+
+Deploy the FastAPI service to:
+
+```text
+[AI SERVICE HOST]
+```
+
+### Database
+
+Use:
+
+```text
+[POSTGRESQL HOST]
+```
+
+Configure production environment variables and verify:
+
+- Frontend → Backend connectivity
+- Backend → PostgreSQL connectivity
+- Backend → AI service connectivity
+- Backend → Image storage connectivity
+
+---
 
 ## 20. Future Improvements
 
 Potential future improvements include:
 
-- Photo evidence for reports
-- AI-assisted complaint categorization
-- AI-generated report summaries
-- Notifications
-- User reputation
-- Advanced analytics
-- More extensive facility coverage
-- Additional authority/maintenance workflows
+- More advanced computer vision models
+- Improved evidence authenticity analysis
+- Advanced duplicate/recycled-image detection
+- Better complaint clustering
+- Predictive maintenance
+- IoT-based toilet sensors
+- Automatic water availability monitoring
+- Multi-language citizen interface
+- SMS/WhatsApp notifications
+- User reputation improvements
+- Ward-level sanitation heatmaps
+- Historical sanitation trends
+- Advanced municipality analytics
+- Larger facility coverage
 
-These should be considered after the core MVP is stable.
+---
 
 ## 21. Team Members
 
@@ -509,6 +949,8 @@ These should be considered after the core MVP is stable.
 |---|---|
 | `<TEAM MEMBER 1>` | `<ROLE>` |
 | `<TEAM MEMBER 2>` | `<ROLE>` |
+| `<TEAM MEMBER 3>` | `<ROLE>` |
+| `<TEAM MEMBER 4>` | `<ROLE>` |
 
 ---
 
@@ -519,15 +961,37 @@ The core product flow is:
 ```text
 Find
   ↓
-Verify
+Location Check-in
   ↓
 Report
   ↓
-Trust Score changes
+Capture Evidence
   ↓
-Discrepancy detected
+Evidence Confidence
   ↓
-Authority prioritizes repair
+Crowd Verification
+  ↓
+Trust Score
+  ↓
+Official Record Comparison
+  ↓
+Discrepancy Detection
+  ↓
+Repair Priority
+  ↓
+Authority Action
+  ↓
+Community Re-Verification
 ```
 
-The MVP should prioritize getting this complete end-to-end flow working reliably before adding optional features.
+The MVP should prioritize completing this end-to-end flow reliably before adding optional features.
+
+## Design Principle
+
+**The system does not claim that AI can perfectly identify a fake image.**
+
+Instead, it makes fraudulent or unreliable reporting harder by combining:
+
+**live camera capture + GPS + timestamps + image analysis + duplicate detection + facility consistency + independent reports + official records.**
+
+This makes the Trust Score an evidence-based confidence measure rather than a simple average of user ratings.

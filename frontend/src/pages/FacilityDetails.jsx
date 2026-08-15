@@ -85,15 +85,12 @@ export default function FacilityDetails() {
         </div>
 
         <div className="facility-actions">
-          <button className="btn btn-primary" type="button" disabled>
-            Report an Issue
-          </button>
-          <button className="btn btn-secondary" type="button" disabled>
-            Verify This Facility
-          </button>
+          <Link to={`/facility/${facility.id}/report`} className="btn btn-primary">
+            Verify &amp; Report
+          </Link>
         </div>
         <p className="facility-actions-note">
-          Reporting and verification are coming in a later milestone.
+          You'll verify your location first, then report on current conditions.
         </p>
       </div>
     </div>

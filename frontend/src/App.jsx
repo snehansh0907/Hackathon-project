@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import FacilityDetails from "./pages/FacilityDetails";
+import ReportFacility from "./pages/ReportFacility";
 import { supabase, isSupabaseConfigured } from "./services/supabaseClient";
 
 /**
@@ -46,6 +47,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route path="/facility/:id" element={<FacilityDetails />} />
+        <Route path="/facility/:id/report" element={<ReportFacility />} />
       </Routes>
     </>
   );

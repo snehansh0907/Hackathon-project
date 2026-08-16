@@ -744,47 +744,6 @@ The project remains intentionally understandable for beginner developers, while 
 - CSS
 - Leaflet
 
-## Backend
-
-- Node.js
-- Express
-
-The backend handles:
-
-- Authentication/authorization integration
-- Reports
-- Evidence processing
-- Trust Score calculation
-- Crowd verification
-- Discrepancy detection
-- Priority calculation
-- Issue management
-- Maintenance workflow
-- Re-verification
-- Database operations
-- AI API communication
-
-## Database
-
-- PostgreSQL
-
-The initial implementation can avoid PostGIS and use a simple Haversine distance calculation for proximity verification.
-
-If the team later finds a genuine need for advanced geospatial queries, PostGIS can be introduced without changing the core product.
-
-## Authentication
-
-- Managed authentication such as Supabase Auth
-
-This avoids building a complete authentication system from scratch.
-
-Roles:
-
-```text
-Citizen
-Authority/Admin
-```
-
 ## Maps
 
 - Leaflet
@@ -814,50 +773,44 @@ Authority/Admin
 ## Deployment
 
 - Vercel or equivalent frontend hosting
-- Node-compatible backend hosting
-- Managed PostgreSQL
+- Node-compatible frontend hosting
+- Managed local/demo data
 - Managed authentication/storage
 
-# 9. Architecture Overview
+# 9. Frontend Architecture Overview
 
 ```text
-                              USER
-                                |
-                                v
-                     +----------------------+
-                     | React + Vite Frontend|
-                     +----------+-----------+
-                                |
-              +-----------------+-----------------+
-              |                 |                 |
-              v                 v                 v
-          Leaflet          Browser GPS       Auth Service
-        OpenStreetMap
-                                |
-                                v
-                     +----------------------+
-                     | Node.js + Express    |
-                     |       Backend        |
-                     +----------+-----------+
-                                |
-       +------------------------+------------------------+
-       |            |            |          |            |
-       v            v            v          v            v
-   PostgreSQL   Image Store   AI Vision  Trust Logic  Auth
-                              API
-       |
-       +------------------------------------------------+
-       |             |            |          |            |
-       v             v            v          v            v
- facilities       reports     evidence   maintenance    issues
-       |
-       +------------------------+
-       |            |           |
-       v            v           v
- trust_scores  verifications  discrepancies
+                         USER
+                           |
+                           v
+                 +----------------------+
+                 | React + Vite Frontend|
+                 +----------+-----------+
+                            |
+          +-----------------+------------------+
+          |                 |                  |
+          v                 v                  v
+      Leaflet          Browser GPS       Local Demo Data
+   OpenStreetMap
+          |                 |                  |
+          +-----------------+------------------+
+                            |
+                            v
+                 +----------------------+
+                 | Frontend State / UI  |
+                 | Logic & Components   |
+                 +----------------------+
+                            |
+        +-------------------+-------------------+
+        |                   |                   |
+        v                   v                   v
+   Trust Score        Report / Evidence    Dashboard UI
+   Calculation         UI / Validation     / Maintenance
 ```
 
-## Request flow: Citizen report
+The application is designed as a frontend-only hackathon demo. Product flows are represented through React components, browser APIs, local/demo data, and client-side logic.
+
+## Frontend request flow: Citizen report
 
 ```text
 Citizen
@@ -866,59 +819,39 @@ React Report Form
   ↓
 Browser gets GPS
   ↓
-POST /api/reports
+Client-side distance check
   ↓
-Express validates request
+User submits report
   ↓
-Check distance from facility
+Photo / evidence selected
   ↓
-Store report
+Frontend validates input
   ↓
-Store evidence
+Client-side evidence confidence
   ↓
-Optional AI analysis
+Client-side crowd/trust calculation
   ↓
-Calculate evidence confidence
-  ↓
-Calculate crowd confidence
-  ↓
-Recalculate Trust Score
-  ↓
-Check discrepancy
-  ↓
-Calculate priority
-  ↓
-Create/update issue
-  ↓
-Return updated facility state
-  ↓
-React updates UI
+UI updates facility state
 ```
 
-## Request flow: Re-verification
+## Frontend re-verification flow
 
 ```text
-Authority marks maintenance completed
-        ↓
-Issue status = WAITING_FOR_VERIFICATION
+Maintenance marked completed in the UI
         ↓
 Citizen opens facility
         ↓
-Citizen submits new verification
+Citizen submits re-verification
         ↓
 GPS check
         ↓
-New report
+Condition selected
         ↓
-Compare with previous issue
+Frontend updates issue state
         ↓
-Problem fixed?
-   ↙             ↘
- YES              NO
- ↓                 ↓
-Resolve          Reopen
- ↓                 ↓
-Update Trust     Increase priority
+Resolved OR Reopened
+        ↓
+Trust Score UI updated
 ```
 
 # 10. Project Structure
@@ -958,58 +891,22 @@ toilet-trust/
 │       │   └── AdminDashboard.jsx
 │       │
 │       ├── services/
-│       │   ├── api.js
-│       │   ├── auth.js
 │       │   ├── map.js
-│       │   └── storage.js
+│       │   ├── storage.js
+│       │   └── demoData.js
 │       │
 │       ├── utils/
 │       │   ├── distance.js
 │       │   ├── formatting.js
-│       │   └── validation.js
+│       │   ├── validation.js
+│       │   └── trustScore.js
 │       │
 │       ├── App.jsx
 │       ├── main.jsx
 │       └── index.css
 │
-├── backend/
-│   ├── src/
-│   │   ├── routes/
-│   │   │   ├── auth.js
-│   │   │   ├── facilities.js
-│   │   │   ├── reports.js
-│   │   │   ├── evidence.js
-│   │   │   ├── issues.js
-│   │   │   ├── maintenance.js
-│   │   │   └── verification.js
-│   │   │
-│   │   ├── services/
-│   │   │   ├── trustScore.js
-│   │   │   ├── crowdVerification.js
-│   │   │   ├── discrepancy.js
-│   │   │   ├── priority.js
-│   │   │   ├── evidence.js
-│   │   │   ├── duplicateDetection.js
-│   │   │   ├── aiAnalysis.js
-│   │   │   └── reverification.js
-│   │   │
-│   │   ├── db/
-│   │   │   └── database.js
-│   │   │
-│   │   ├── middleware/
-│   │   │   ├── auth.js
-│   │   │   ├── admin.js
-│   │   │   └── validation.js
-│   │   │
-│   │   └── server.js
-│   │
-│   └── package.json
-│
-├── database/
-│   ├── schema.sql
-│   └── seed.sql
-│
-├── .env.example
+├── .gitignore
+├── package.json
 └── README.md
 ```
 
@@ -1021,13 +918,7 @@ Expected:
 - npm
 - Git
 - GitHub account
-- PostgreSQL
-- Authentication provider account
-- Image storage account if required
-- AI API key
 - Modern browser with geolocation support
-
-> **Placeholder:** Add exact versions after the environment is finalized.
 
 # 12. Installation
 
@@ -1045,42 +936,13 @@ cd frontend
 npm install
 ```
 
-Install backend dependencies:
+# 13. Frontend Setup
 
-```bash
-cd ../backend
-npm install
-```
+The application is designed to run entirely on the frontend.
 
-Create environment files using `.env.example`.
+No frontend server, local/demo data local demo data, or frontend API configuration is required.
 
-Set up PostgreSQL using the database schema.
-
-Configure authentication, storage, and AI API credentials.
-
-# 13. Environment Variables
-
-## Frontend
-
-```env
-VITE_API_URL=<BACKEND_API_URL>
-VITE_AUTH_URL=<AUTH_PROVIDER_URL>
-VITE_STORAGE_URL=<STORAGE_URL_IF_NEEDED>
-```
-
-## Backend
-
-```env
-PORT=<PORT>
-DATABASE_URL=<POSTGRES_CONNECTION_STRING>
-AUTH_SECRET=<AUTH_SECRET>
-AI_API_KEY=<AI_API_KEY>
-IMAGE_STORAGE_URL=<IMAGE_STORAGE_URL>
-```
-
-> **Important:** Never commit real secrets or API keys to GitHub.
-
-> **Placeholder:** Replace these names with the exact variables used by the final implementation.
+For demo functionality, the application can use local/demo facility data and client-side state.
 
 # 14. How to Run Frontend
 
@@ -1090,559 +952,24 @@ npm install
 npm run dev
 ```
 
-> **Placeholder:** Add final local frontend URL/port.
-
-# 15. How to Run Backend
-
-```bash
-cd backend
-npm install
-npm run dev
-```
-
-> **Placeholder:** Add final local backend URL/port.
-
-# 16. Database Setup
-
-The project uses PostgreSQL.
-
-## Main tables
-
-```text
-users
-facilities
-reports
-evidence
-maintenance
-trust_scores
-issues
-verifications
-```
-
-## `users`
-
-Stores application users and their roles.
-
-```text
-id
-name
-email
-role
-created_at
-```
-
-Roles:
-
-```text
-citizen
-authority
-admin
-```
-
-## `facilities`
-
-Stores public toilet information.
-
-```text
-id
-name
-address
-latitude
-longitude
-accessibility
-official_status
-created_at
-updated_at
-```
-
-## `reports`
-
-Stores citizen observations.
-
-```text
-id
-facility_id
-user_id
-functionality
-water
-cleanliness
-other_problem
-latitude
-longitude
-created_at
-```
-
-## `evidence`
-
-Stores submitted evidence.
-
-```text
-id
-report_id
-image_url
-timestamp
-evidence_confidence
-duplicate_flag
-ai_analysis
-ai_confidence
-created_at
-```
-
-## `maintenance`
-
-Stores authority maintenance information.
-
-```text
-id
-facility_id
-issue_id
-status
-maintenance_date
-notes
-created_at
-```
-
-## `trust_scores`
-
-Stores calculated Trust Score information.
-
-```text
-id
-facility_id
-trust_score
-crowd_confidence
-evidence_confidence
-freshness_score
-official_consistency
-discrepancy_score
-priority_score
-score_breakdown
-calculated_at
-```
-
-## `issues`
-
-Stores problems requiring attention.
-
-```text
-id
-facility_id
-source_report_id
-priority
-status
-reason
-created_at
-updated_at
-```
-
-## `verifications`
-
-Stores explicit verification/re-verification events.
-
-```text
-id
-facility_id
-report_id
-user_id
-verification_type
-result
-created_at
-```
-
-Possible verification types:
-
-```text
-initial
-reverification
-```
-
-Possible results:
-
-```text
-verified_fixed
-still_problematic
-```
-
-## Relationships
-
-```text
-users
-  |
-  +---- reports
-  |       |
-  |       +---- evidence
-  |
-  +---- verifications
-            |
-            +---- facilities
-                    |
-                    +---- maintenance
-                    |
-                    +---- trust_scores
-                    |
-                    +---- issues
-                    |
-                    +---- reports
-```
-
-## Indexes
-
-Useful indexes can be added for:
-
-- `facilities(latitude, longitude)`
-- `reports(facility_id, created_at)`
-- `issues(facility_id, status)`
-- `trust_scores(facility_id, calculated_at)`
-- `evidence(report_id)`
-
-The exact indexing strategy can be finalized after implementation.
-
-## Demo seed data
-
-The project should use a small, clearly labelled dataset suitable for the hackathon demonstration.
-
-# 17. API Documentation
-
-The application uses a REST API through Node.js + Express.
-
-> **Placeholder:** Final endpoint names and schemas should be updated after implementation.
-
-## Authentication
-
-```http
-POST /api/auth/profile
-```
-
-Returns/creates the application profile after authentication.
-
-## Facilities
-
-```http
-GET /api/facilities
-```
-
-Returns facilities for the map.
-
-```http
-GET /api/facilities/:id
-```
-
-Returns facility details.
-
-```http
-GET /api/facilities/:id/reports
-```
-
-Returns recent reports.
-
-```http
-GET /api/facilities/:id/trust-score
-```
-
-Returns the current Trust Score and breakdown.
-
-## Reports
-
-```http
-POST /api/reports
-```
-
-Creates a citizen report.
-
-Conceptual request:
-
-```json
-{
-  "facility_id": 1,
-  "functionality": "non_functional",
-  "water": false,
-  "cleanliness": "poor",
-  "other_problem": "No water available",
-  "latitude": 20.2963,
-  "longitude": 85.8247
-}
-```
-
-Backend flow:
-
-```text
-Validate request
-      ↓
-Validate authentication
-      ↓
-Check proximity
-      ↓
-Store report
-      ↓
-Process evidence
-      ↓
-Calculate evidence confidence
-      ↓
-Calculate crowd confidence
-      ↓
-Recalculate Trust Score
-      ↓
-Check discrepancy
-      ↓
-Calculate priority
-      ↓
-Create/update issue
-      ↓
-Return updated state
-```
-
-## Evidence
-
-```http
-POST /api/evidence
-```
-
-Uploads/associates evidence with a report.
-
-Possible processing:
-
-```text
-Upload image
-    ↓
-Store image
-    ↓
-Generate basic image identifier
-    ↓
-Check possible duplicate
-    ↓
-Optional AI analysis
-    ↓
-Calculate evidence confidence
-    ↓
-Store evidence result
-```
-
-## Issues
-
-```http
-GET /api/issues
-```
-
-Returns issues for authorized users.
-
-```http
-GET /api/issues/:id
-```
-
-Returns issue details.
-
-```http
-PATCH /api/issues/:id
-```
-
-Updates issue status/priority.
-
-Possible statuses:
-
-```text
-OPEN
-UNDER_REVIEW
-MAINTENANCE
-WAITING_FOR_VERIFICATION
-RESOLVED
-REOPENED
-```
-
-## Maintenance
-
-```http
-POST /api/maintenance
-```
-
-Creates a maintenance update.
-
-Conceptual request:
-
-```json
-{
-  "facility_id": 1,
-  "issue_id": 5,
-  "status": "completed",
-  "notes": "Water supply restored."
-}
-```
-
-## Re-verification
-
-```http
-POST /api/verifications
-```
-
-Creates a citizen verification/re-verification event.
-
-Conceptual request:
-
-```json
-{
-  "facility_id": 1,
-  "verification_type": "reverification",
-  "result": "verified_fixed",
-  "latitude": 20.2963,
-  "longitude": 85.8247
-}
-```
-
-# 18. Testing
-
-Testing should focus on complete user journeys rather than only individual functions.
-
-## Citizen journey
-
-```text
-Login
- ↓
-Open map
- ↓
-Select facility
- ↓
-View Trust Score
- ↓
-Verify location
- ↓
-Submit report
- ↓
-Upload evidence
- ↓
-See updated status
-```
-
-## Crowd verification
-
-Test:
-
-- One report
-- Multiple matching reports
-- Conflicting reports
-- Old reports
-- Recent reports
-
-## Trust Score
-
-Test:
-
-- Healthy facility
-- Low-trust facility
-- Multiple negative reports
-- High evidence confidence
-- Low evidence confidence
-- Stale information
-- Official/citizen disagreement
-
-## AI
-
-Test:
-
-- Successful AI response
-- AI detects possible issue
-- AI returns low confidence
-- AI API failure
-- Invalid image
-
-The application should still work if the AI service is unavailable.
-
-## Duplicate evidence
-
-Test:
-
-- Same image submitted twice
-- Different images
-- Similar images
-- Duplicate flag handling
-
-## Location
-
-Test:
-
-- User within verification radius
-- User outside verification radius
-- Location permission denied
-- Location unavailable
-
-## Authority workflow
-
-```text
-Issue created
-    ↓
-Priority calculated
-    ↓
-Open
-    ↓
-Under Review
-    ↓
-Maintenance
-    ↓
-Waiting for Verification
-    ↓
-Citizen verifies
-    ↓
-Resolved OR Reopened
-```
-
-## Security
-
-Test that:
-
-- Citizens cannot modify Trust Scores directly.
-- Citizens cannot access authority-only operations.
-- Authority routes require the correct role.
-- Invalid report data is rejected.
-- Users cannot submit arbitrary facility IDs without validation.
-- API keys are not exposed in frontend code.
-- Authentication tokens are handled securely.
+The application runs as a React + Vite frontend.
 
 # 19. Deployment
 
-Planned deployment:
+The frontend can be deployed to Vercel or any equivalent static/frontend hosting platform.
 
 ```text
-                       GitHub
-                          |
-             +------------+------------+
-             |                         |
-             v                         v
-        React/Vite                 Node/Express
-         Frontend                    Backend
-             |                         |
-             |                         |
-             +------------+------------+
-                          |
-                          v
-                     PostgreSQL
-                          |
-             +------------+------------+
-             |            |            |
-             v            v            v
-         Auth Service  Image Store   AI API
+                        GitHub
+                           |
+                           v
+                    React + Vite
+                      Frontend
+                           |
+                           v
+                 Static/Web Hosting
 ```
 
-## Frontend
-
-Deploy the React/Vite application to Vercel or an equivalent service.
-
-## Backend
-
-Deploy the Node/Express application to a Node-compatible hosting service.
-
-> **Placeholder:** Final provider.
-
-## Database
-
-Use managed PostgreSQL.
-
-## Production URLs
-
-```text
-Frontend:
-<FRONTEND_URL>
-
-Backend:
-<BACKEND_URL>
-```
+No frontend deployment or local demo data hosting is required for the frontend-only demo.
 
 # 20. Future Improvements
 
@@ -1686,9 +1013,10 @@ The team should implement the **full planned feature set**, while still keeping 
 
 ```text
 React + Vite
-Node + Express
-PostgreSQL
-Authentication
+JavaScript
+CSS
+Leaflet
+OpenStreetMap
 GitHub
 ```
 
@@ -1764,39 +1092,34 @@ Demo polish
 
 # Implementation Philosophy
 
-The project has enough development time to implement the features, but **more time does not mean we should make the architecture unnecessarily complicated**.
+The project is intentionally implemented as a frontend-only hackathon experience.
 
 The guiding principle is:
 
-> **Build all the product features, but implement each one with the simplest reliable technology.**
+> **Build the complete product experience with the simplest reliable frontend technology.**
 
 We intentionally avoid:
 
-- Training our own AI model
-- Building a custom computer-vision pipeline
-- Building a separate AI backend
-- Unnecessary microservices
+- A custom frontend server
+- Local Demo Data infrastructure
+- Microservices
+- Complex authentication infrastructure
 - Continuous location tracking
-- Over-engineered authentication
-- Nationwide infrastructure
-- Complex contractor management
+- Custom AI model training
+- Unnecessary infrastructure
 
-We do use:
+We use:
 
-- Existing APIs/services
-- Explainable formulas
-- A single Node/Express backend
-- PostgreSQL
-- Managed authentication
-- Managed image storage
-- Browser GPS
-- Existing AI vision APIs
-- Simple image similarity/deduplication
-- A small but convincing demo dataset
+- React + Vite
+- Browser Geolocation API
+- Leaflet + OpenStreetMap
+- Client-side validation
+- Local/demo data
+- Explainable client-side formulas
+- Simple image/evidence handling
+- Responsive UI components
 
-This gives the team enough room to build the **complete ToiletTrust experience** without turning the hackathon into a production infrastructure project.
-
----
+The goal is to demonstrate the complete ToiletTrust user experience without requiring frontend infrastructure.
 
 # Core Product Loop
 

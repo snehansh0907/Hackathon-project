@@ -57,27 +57,7 @@ Map
  → View result (success → View Facility / Back to Map, or error → Try Again / Edit Report)
 ```
 
-## 6. Screenshots
-
-### Map
-[Add screenshot here]
-
-### Facility Details
-[Add screenshot here]
-
-### Trust Score
-[Add screenshot here]
-
-### Discrepancy Alert
-[Add screenshot here]
-
-### Report Form
-[Add screenshot here]
-
-### Photo Evidence Upload
-[Add screenshot here]
-
-## 7. Tech Stack
+## 6. Tech Stack
 
 Verified from `package.json`:
 
@@ -93,7 +73,7 @@ Verified from `package.json`:
 | `@supabase/supabase-js` | Authentication (Supabase Auth) |
 | oxlint | Linting |
 
-## 8. Frontend Architecture
+## 7. Frontend Architecture
 
 - **Pages** (`src/pages/`) — one component per route: `Home`, `Login`, `FacilityDetails`, `ReportFacility`.
 - **Components** (`src/components/`) — smaller, reusable pieces used by the pages (map, forms, score displays, etc.).
@@ -102,7 +82,7 @@ Verified from `package.json`:
 - **Authentication** — a simple `user` state in `App.jsx`, kept in sync with Supabase Auth's session via `onAuthStateChange`.
 - **Component communication** — plain React props and callbacks (e.g. `PhotoUpload` calls `onChange(file)`, `GPSVerification` calls `onVerified()`). No global state library is used.
 
-## 9. Project Structure
+## 8. Project Structure
 
 ```
 toilettrust-frontend/
@@ -138,13 +118,13 @@ toilettrust-frontend/
         └── supabaseClient.js  # Supabase client (safe if env vars are unset)
 ```
 
-## 10. Current Data/API Approach
+## 9. Current Data/API Approach
 
 **The frontend currently uses mock data only.** `src/services/mockData.js` defines a fixed array of 7 sample facilities. `src/services/api.js` wraps that mock data behind four async functions — `getFacilities()`, `getFacility(id)`, `verifyLocation()`, `submitReport()` — with an artificial delay so loading states behave realistically.
 
 Every one of these functions has a commented-out "real version" directly below it showing the intended `fetch()` call once a backend exists. No other file in the app imports mock data directly — only `api.js` does — so swapping mock data for real API calls should only require editing `api.js`.
 
-## 11. Authentication
+## 10. Authentication
 
 Authentication uses **Supabase Auth**, implemented in `src/services/supabaseClient.js` and `src/pages/Login.jsx`.
 
@@ -152,7 +132,7 @@ Authentication uses **Supabase Auth**, implemented in `src/services/supabaseClie
 - If those env vars are **not** set, `isSupabaseConfigured` is `false`, the Supabase client is `null`, and the Login page shows a notice instead of crashing — the form will display an error on submit rather than calling Supabase.
 - There is currently no route protection — all pages are accessible whether or not a user is logged in.
 
-## 12. Map and Location
+## 11. Map and Location
 
 - **Map library:** Leaflet, via `react-leaflet`.
 - **Map provider:** OpenStreetMap tiles.
@@ -160,7 +140,7 @@ Authentication uses **Supabase Auth**, implemented in `src/services/supabaseClie
 - **Geolocation:** `GPSVerification.jsx` calls the browser's `navigator.geolocation.getCurrentPosition()` to get the user's coordinates.
 - **Distance validation:** **not implemented in the frontend.** The raw coordinates are sent to a mocked `verifyLocation()` function in `api.js`, which randomly returns verified/not-verified. The actual 100m radius check is intended to happen on the backend — the frontend never calculates distance.
 
-## 13. Reporting
+## 12. Reporting
 
 The report form (`ReportForm.jsx`) currently collects:
 
@@ -174,13 +154,13 @@ Validation blocks submission if any required field is missing, showing inline er
 
 **Submission is currently mocked.** `submitReport()` in `api.js` waits ~900ms and then succeeds about 90% of the time (fails the rest, so both outcomes are demoable). No data is actually sent anywhere or persisted — nothing is uploaded to Cloudinary or any backend yet.
 
-## 14. Trust Score
+## 13. Trust Score
 
 `TrustScore.jsx` displays a numeric score (0–100) as a ring gauge plus a 5-part breakdown (Recent reports, Evidence confidence, Crowd agreement, Official consistency, Freshness), each shown as a `score/max` bar.
 
 **The frontend does not calculate the Trust Score or its breakdown.** Both the overall score and every breakdown value are fixed fields on the mock facility objects in `mockData.js`. The component only renders whatever numbers it's given as props.
 
-## 15. Discrepancy Detection
+## 14. Discrepancy Detection
 
 `DiscrepancyAlert.jsx` renders one of two states based on a `discrepancy` boolean:
 
@@ -189,7 +169,7 @@ Validation blocks submission if any required field is missing, showing inline er
 
 **The frontend does not determine whether a discrepancy exists.** `discrepancy`, `official_status`, `citizen_status`, and `discrepancy_reason` are all fixed fields on the mock facility data. No threshold logic, report counting, or official/citizen comparison exists in the React code — that logic is intended to live entirely on the backend.
 
-## 16. Setup and Installation
+## 15. Setup and Installation
 
 **Prerequisites:** Node.js (a recent LTS version) and npm.
 
@@ -203,7 +183,7 @@ npm run dev
 
 Then open the local URL Vite prints (typically `http://localhost:5173`).
 
-## 17. Environment Variables
+## 16. Environment Variables
 
 Referenced in the current code (see `.env.example`):
 
@@ -215,7 +195,7 @@ Referenced in the current code (see `.env.example`):
 
 None of these have real values checked into the repo. Copy `.env.example` to `.env` and fill in your own Supabase project's URL/key if you want live login to work; the app runs fine without them (Login just shows a configuration notice).
 
-## 18. Development
+## 17. Development
 
 ```bash
 npm run dev       # Start the Vite dev server with hot reload
@@ -224,7 +204,7 @@ npm run preview    # Preview the production build locally
 npm run lint        # Run oxlint
 ```
 
-## 19. Current Limitations
+## 18. Current Limitations
 
 - **No backend is connected.** All facility, trust, crowd, discrepancy, and priority data is hardcoded mock data in `mockData.js`.
 - **Report submission is mocked** — no data is persisted or sent anywhere; success/failure is randomized client-side to demo both states.
@@ -236,11 +216,11 @@ npm run lint        # Run oxlint
 - **No route protection** — pages are accessible regardless of login state.
 - **Gemini is not integrated anywhere in the frontend.**
 
-## 20. Backend Integration
+## 19. Backend Integration
 
 This frontend is being built independently while a teammate develops the backend separately. It's structured around a single service layer (`src/services/api.js`) specifically so the current mock data can be swapped for real backend calls later without changing any page or component code. No backend API endpoints have been assumed or hardcoded beyond the illustrative examples left as comments in `api.js`.
 
-## 21. Future Improvements
+## 20. Future Improvements
 
 Planned but **not yet implemented**:
 
@@ -253,7 +233,7 @@ Planned but **not yet implemented**:
 - Maintenance status workflow and re-verification flow
 - Route protection based on auth state
 
-## 22. Team
+## 21. Team
 
 - [Team Member 1] Snehansh Tripathy
 - [Team Member 2] Utsav Kumar

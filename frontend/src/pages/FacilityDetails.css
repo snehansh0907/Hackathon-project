@@ -20,13 +20,8 @@
 }
 
 .facility-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
-  padding-bottom: 24px;
+  padding-bottom: 20px;
   border-bottom: 1px solid var(--color-line);
-  flex-wrap: wrap;
 }
 
 .facility-name {
@@ -59,10 +54,24 @@
   font-weight: 500;
 }
 
+.facility-section {
+  margin: 32px 0;
+}
+
+.facility-section__title {
+  font-size: 1.15rem;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.discrepancy-alert {
+  margin: 32px 0;
+}
+
 .facility-actions {
   display: flex;
   gap: 12px;
-  margin-top: 8px;
+  margin-top: 32px;
   flex-wrap: wrap;
 }
 

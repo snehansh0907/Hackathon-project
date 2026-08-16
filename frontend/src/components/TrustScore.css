@@ -1,3 +1,10 @@
+.trust-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+
 .trust-gauge {
   display: inline-flex;
   flex-direction: column;
@@ -94,4 +101,52 @@
 .trust-gauge__badge--low {
   color: var(--color-trust-low);
   background: var(--color-trust-low-tint);
+}
+
+/* --- Breakdown --- */
+
+.trust-breakdown {
+  width: 100%;
+  max-width: 340px;
+}
+
+.trust-breakdown__title {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.trust-breakdown__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trust-breakdown__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 5px;
+}
+
+.trust-breakdown__value {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--color-ink-soft);
+}
+
+.trust-breakdown__bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-line);
+  overflow: hidden;
+}
+
+.trust-breakdown__bar-fill {
+  height: 100%;
+  background: var(--color-brand);
+  border-radius: 999px;
 }

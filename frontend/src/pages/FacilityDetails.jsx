@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import TrustScore from "../components/TrustScore";
+import DiscrepancyAlert from "../components/DiscrepancyAlert";
 import { getFacility } from "../services/api";
 import "./FacilityDetails.css";
 
 /**
  * Facility Details page — /facility/:id
- * Shows the full picture of one facility. The "Report an Issue" and
- * "Verify This Facility" buttons are placeholders for a later milestone;
- * they intentionally do nothing yet.
+ *
+ * Layout order (per product spec):
+ * Facility info → Trust Score → Discrepancy status → GPS/Verify → Report.
+ *
+ * Every score/flag below comes straight from the facility object
+ * returned by the API layer — nothing on this page is calculated here.
  */
 export default function FacilityDetails() {
   const { id } = useParams();
@@ -57,12 +61,10 @@ export default function FacilityDetails() {
           ← Back to map
         </Link>
 
+        {/* Facility information */}
         <div className="facility-header">
-          <div>
-            <h1 className="facility-name">{facility.name}</h1>
-            <p className="facility-address">{facility.address}</p>
-          </div>
-          <TrustScore score={facility.trust_score} size="lg" />
+          <h1 className="facility-name">{facility.name}</h1>
+          <p className="facility-address">{facility.address}</p>
         </div>
 
         <div className="facility-grid">
@@ -84,6 +86,27 @@ export default function FacilityDetails() {
           </div>
         </div>
 
+        {/* Trust Score + breakdown */}
+        <section className="facility-section">
+          <h2 className="facility-section__title">Trust Score</h2>
+          <TrustScore
+            score={facility.trust_score}
+            breakdown={facility.trust_breakdown}
+            size="lg"
+          />
+        </section>
+
+        {/* Discrepancy status */}
+        <section className="facility-section">
+          <DiscrepancyAlert
+            discrepancy={facility.discrepancy}
+            official_status={facility.official_status}
+            citizen_status={facility.citizen_status}
+            discrepancy_reason={facility.discrepancy_reason}
+          />
+        </section>
+
+        {/* GPS / Verify + Report */}
         <div className="facility-actions">
           <Link to={`/facility/${facility.id}/report`} className="btn btn-primary">
             Verify &amp; Report

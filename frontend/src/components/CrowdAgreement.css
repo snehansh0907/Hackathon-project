@@ -1,0 +1,74 @@
+.crowd-agreement {
+  background: var(--color-paper-raised);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+}
+
+.crowd-agreement__headline {
+  font-size: 1.05rem;
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+.crowd-agreement__headline strong {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+}
+
+.crowd-agreement__bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-trust-low-tint);
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.crowd-agreement__bar-fill {
+  height: 100%;
+  background: var(--color-trust-high);
+  border-radius: 999px;
+}
+
+.crowd-agreement__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.crowd-agreement__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 10px 6px;
+  background: var(--color-paper);
+  border-radius: var(--radius-md);
+}
+
+.crowd-agreement__stat-value {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.crowd-agreement__stat-value--agree {
+  color: var(--color-trust-high);
+}
+
+.crowd-agreement__stat-value--disagree {
+  color: var(--color-trust-low);
+}
+
+.crowd-agreement__stat-label {
+  font-size: 0.72rem;
+  color: var(--color-ink-soft);
+  margin-top: 2px;
+}
+
+.crowd-agreement__last-report {
+  font-size: 0.82rem;
+  color: var(--color-ink-soft);
+  margin: 0;
+}

@@ -1,1200 +1,259 @@
-# ToiletTrust 🚻
+# ToiletTrust
 
-> **A real-time trust and accountability layer for public toilets and sanitation facilities.**
+## 1. Project Description
 
-ToiletTrust combines recent, location-verified citizen observations, photographic evidence, crowd consensus, facility information, and official/demo maintenance records to show whether a public toilet can be trusted **right now** — and helps authorities identify and prioritize problems.
+The ToiletTrust frontend is a React web app that lets citizens find nearby public toilets on a map and see how trustworthy each one currently is, based on Trust Score, crowd verification, and discrepancy information.
 
----
+## 2. Problem
 
-# 1. Project Title
+Public toilet listings (official or otherwise) often go stale — a facility marked "functional" in a government database may actually be broken, dirty, or out of water for days before anyone updates the record. Citizens have no easy way to know the *current* real-world condition of a public toilet before they go, and there's no simple way for the community to flag when official records don't match reality.
 
-**ToiletTrust**
+## 3. Current Solution
 
-# 2. One-line Description
+The current frontend lets a citizen:
 
-A real-time public sanitation platform that verifies toilet conditions through citizen reports, evidence, crowd consensus, and an explainable Trust Score.
+- Browse public toilets on an interactive map
+- Open a facility's details page to see its Trust Score, breakdown, and whether official records currently disagree with recent citizen reports
+- Verify their GPS location and submit a condition report (functionality, water, cleanliness, optional notes and photo) for a facility
+- See a submission result (success or error) after reporting
+- Log in / sign up via Supabase Auth (when configured)
 
-# 3. Problem
+All data shown right now — facilities, Trust Scores, discrepancy results, and report submissions — comes from a **mock data/API layer**, not a live backend. See [Section 10](#10-current-dataapi-approach) and [Section 19](#19-current-limitations).
 
-Information about public toilets can become outdated very quickly.
+## 4. Current Features
 
-A toilet may be marked as functional in an official record while, in reality:
+Verified against the current source code:
 
-- Water is unavailable.
-- The toilet is not functional.
-- The facility is dirty.
-- Lighting or other facilities are not working.
-- Accessibility-related problems exist.
-- Multiple recent visitors are experiencing the same problem.
+- ✅ Login / signup page (Supabase Auth integration, degrades gracefully if unconfigured)
+- ✅ Interactive map (Leaflet + OpenStreetMap) with trust-colored facility markers
+- ✅ Facility details page (functionality, water, cleanliness, last verified)
+- ✅ Trust Score display with a visual gauge and a 5-part breakdown
+- ✅ Discrepancy display (flags when official records and citizen reports disagree, or shows a "consistent" state)
+- ✅ GPS location verification step (browser Geolocation API + mocked backend check)
+- ✅ Citizen report form (functionality / water / cleanliness / optional notes, with validation)
+- ✅ Photo evidence upload UI (file picker, preview, remove, type/size validation)
+- ✅ Report submission flow with loading, success, and error states
 
-Traditional ratings are also not very useful for a real-time question such as:
+Not currently implemented in the frontend (see [Section 21](#21-future-improvements)):
 
-> **"Can I trust this public toilet right now?"**
+- ❌ Crowd agreement display and Priority Score badge — both were built (`CrowdAgreement.jsx`, `PriorityBadge.jsx` exist in `src/components/`) but are **not currently rendered on any page**
+- ❌ Authority/admin dashboard
+- ❌ Maintenance workflow / re-verification flow
+- ❌ Any real backend, database, or third-party API connection (Gemini, Cloudinary, etc.)
 
-ToiletTrust addresses this by combining **freshness, location verification, evidence, crowd agreement, and official information** instead of relying on a static rating.
+## 5. User Flow
 
-# 4. Solution
+The implemented journey:
 
-ToiletTrust creates a feedback loop between citizens and sanitation authorities:
-
-```text
-Find Facility
-     ↓
-Location Verification
-     ↓
-Citizen Report
-     ↓
-Photo / Evidence
-     ↓
-Evidence Analysis
-     ↓
-Crowd Verification
-     ↓
-Trust Score
-     ↓
-Discrepancy Detection
-     ↓
-Priority / Issue
-     ↓
-Authority Action
-     ↓
-Maintenance Completed
-     ↓
-Citizen Re-verification
-     ↓
-Trust Score Updated
+```
+Map
+ → Select a facility marker
+ → View Facility Details (info, Trust Score, discrepancy status)
+ → Click "Verify & Report"
+ → Verify location (GPS)
+ → Fill out report form
+ → Add photo evidence (optional)
+ → Submit report
+ → View result (success → View Facility / Back to Map, or error → Try Again / Edit Report)
 ```
 
-The platform does not assume that one report is automatically true.
+## 6. Screenshots
 
-Instead, it evaluates multiple signals:
+### Map
+[Add screenshot here]
 
-- How recent the report is
-- Whether the citizen was near the facility
-- Whether evidence was provided
-- Whether multiple reports agree
-- Whether reports conflict with official/demo records
-- Whether the issue has been resolved and re-verified
+### Facility Details
+[Add screenshot here]
 
-The Trust Score is intentionally **transparent and explainable**.
+### Trust Score
+[Add screenshot here]
 
-# 5. Key Features
+### Discrepancy Alert
+[Add screenshot here]
 
-## 5.1 Public Toilet Map 🗺️
+### Report Form
+[Add screenshot here]
 
-An interactive map displays public toilet facilities.
+### Photo Evidence Upload
+[Add screenshot here]
 
-Users can:
+## 7. Tech Stack
 
-- See nearby facilities.
-- Open a facility.
-- View its Trust Score.
-- See its current status.
-- Start a verification/report.
+Verified from `package.json`:
 
-Technology:
+| Technology | Purpose |
+|---|---|
+| React 19 | UI library |
+| Vite | Dev server / build tool |
+| JavaScript (JSX) | Application code |
+| CSS | Styling (plain CSS files, no framework) |
+| React Router (`react-router-dom`) | Client-side routing |
+| Leaflet + `react-leaflet` | Interactive map |
+| OpenStreetMap | Map tile provider |
+| `@supabase/supabase-js` | Authentication (Supabase Auth) |
+| oxlint | Linting |
 
-- Leaflet
-- OpenStreetMap
+## 8. Frontend Architecture
 
----
+- **Pages** (`src/pages/`) — one component per route: `Home`, `Login`, `FacilityDetails`, `ReportFacility`.
+- **Components** (`src/components/`) — smaller, reusable pieces used by the pages (map, forms, score displays, etc.).
+- **Services** (`src/services/`) — all data access. `api.js` is the only place pages/components should import facility data from; `mockData.js` is the current data source; `supabaseClient.js` sets up the Supabase Auth client.
+- **Routing** — defined in `App.jsx` using `react-router-dom`'s `<Routes>`/`<Route>`.
+- **Authentication** — a simple `user` state in `App.jsx`, kept in sync with Supabase Auth's session via `onAuthStateChange`.
+- **Component communication** — plain React props and callbacks (e.g. `PhotoUpload` calls `onChange(file)`, `GPSVerification` calls `onVerified()`). No global state library is used.
 
-## 5.2 Facility Profile 🚻
+## 9. Project Structure
 
-Each facility has a dedicated profile showing:
-
-- Facility name
-- Address
-- Latitude/longitude
-- Accessibility information
-- Current Trust Score
-- Current status
-- Water availability
-- Cleanliness condition
-- Functionality
-- Recent reports
-- Last verification time
-- Crowd confidence
-- Open issues
-- Maintenance information
-
-Example:
-
-```text
-Central Market Public Toilet
-
-Trust Score: 74 / 100
-🟢 Generally Trusted
-
-Water:       ✓ Available
-Function:    ✓ Working
-Cleanliness: ⚠️ Moderate
-
-Last verified: 12 minutes ago
-
-Crowd confidence: 82%
 ```
-
----
-
-## 5.3 Location Verification 📍
-
-Before submitting a verification, the browser requests the user's location.
-
-The application calculates the approximate distance between:
-
-```text
-User Location
-      +
-Facility Location
-      ↓
-Distance Check
-```
-
-Example:
-
-```text
-Distance: 43 metres
-Required range: 100 metres
-
-✓ Location verified
-```
-
-If the user is too far away:
-
-```text
-Distance: 1.4 km
-
-✕ You need to be closer to verify this facility.
-```
-
-The MVP uses a simple latitude/longitude distance calculation and does not require complex geospatial infrastructure.
-
----
-
-## 5.4 Citizen Reporting 📝
-
-A citizen can quickly report the current condition of a facility.
-
-Possible fields:
-
-### Functionality
-
-```text
-✓ Working
-⚠️ Partially working
-✕ Not working
-```
-
-### Water
-
-```text
-✓ Available
-✕ Not available
-```
-
-### Cleanliness
-
-```text
-Excellent
-Good
-Average
-Poor
-Very Poor
-```
-
-### Other issues
-
-Examples:
-
-- Broken flush
-- No lighting
-- Bad smell
-- Damaged door
-- Accessibility problem
-- Other
-
-The report is timestamped automatically.
-
----
-
-## 5.5 Photo Evidence 📷
-
-Users can attach a photo as evidence.
-
-The system stores:
-
-- Image
-- Report ID
-- Timestamp
-- Verification location
-- Evidence confidence
-- Duplicate/similarity information
-- Optional AI analysis
-
-The browser can allow:
-
-- Camera capture
-- Image upload
-
----
-
-## 5.6 Evidence Confidence 🔍
-
-Evidence confidence is a simple score that explains how strong the submitted evidence is.
-
-Example factors:
-
-```text
-GPS verified             +25
-Recent timestamp         +20
-Photo provided           +20
-No duplicate detected    +15
-Crowd agreement          +20
-                         ----
-                         100
-```
-
-The exact weights can be tuned during implementation.
-
-Example:
-
-```text
-Evidence Confidence: 85%
-
-✓ Location verified
-✓ Recent report
-✓ Photo attached
-✓ No duplicate detected
-✓ Similar reports found
-```
-
-This is deliberately rule-based so that it is easy to explain and debug.
-
----
-
-## 5.7 Duplicate / Similar Evidence Detection 🔍
-
-The system attempts to identify whether the same or very similar evidence has already been submitted.
-
-Basic implementation can use:
-
-- Image hashing
-- File metadata
-- Basic image similarity
-
-If a likely duplicate is detected:
-
-```text
-⚠️ Similar evidence has already been submitted.
-```
-
-This does not automatically reject the report; it can lower evidence confidence or flag it for review.
-
----
-
-## 5.8 AI-Assisted Evidence Analysis 🤖
-
-An existing AI vision API can analyze submitted photographs for visible issues.
-
-Example:
-
-```text
-Citizen Photo
-     ↓
-AI Vision API
-     ↓
-Possible issues:
-- Poor cleanliness
-- Possible water-related issue
-- Damaged fixture
-     ↓
-Confidence
-```
-
-The AI output is stored as supporting evidence.
-
-### Important principle
-
-AI does **not** decide whether a report is true by itself.
-
-Instead:
-
-```text
-Citizen Report
-+
-GPS
-+
-Timestamp
-+
-Photo
-+
-AI Analysis
-+
-Crowd Agreement
-+
-Official Data
-       ↓
-Overall Assessment
-```
-
-No custom model training is required.
-
----
-
-## 5.9 Crowd Verification 👥
-
-Recent reports from multiple users can reinforce each other.
-
-Example:
-
-```text
-10 recent reports
-
-8 → No water
-1 → Water available
-1 → Not sure
-
-Crowd agreement = 80%
-```
-
-The system can display:
-
-> **80% of recent reports agree that water is unavailable.**
-
-The calculation can be kept simple:
-
-```text
-matching recent reports
------------------------
-total relevant reports
-```
-
-Reports should be weighted toward recent observations.
-
----
-
-## 5.10 Trust Score ⭐
-
-The Trust Score is a 0–100 indicator of how trustworthy the current facility information is.
-
-The score should be explainable rather than being a mysterious AI number.
-
-Possible components:
-
-```text
-Recent citizen reports
-Evidence confidence
-Crowd agreement
-Official status consistency
-Freshness
-Current issue severity
-```
-
-Example UI:
-
-```text
-             TRUST SCORE
-
-                74 / 100
-             🟢 Trusted
-
-Recent reports          28 / 35
-Evidence confidence     17 / 20
-Crowd agreement         16 / 20
-Official consistency     8 / 10
-Freshness                5 / 15
-                       ----------
-                         74
-```
-
-The final weights should be agreed by the team before implementation.
-
----
-
-## 5.11 Trust Score Freshness 🕐
-
-A score should not appear equally trustworthy forever.
-
-The UI therefore displays:
-
-```text
-Last verified:
-12 minutes ago
-```
-
-Older information can gradually contribute less to the current assessment.
-
-Example:
-
-```text
-2 minutes ago  → Very fresh
-30 minutes ago → Fresh
-3 hours ago    → Aging
-2 days ago     → Stale
-```
-
-The exact freshness rules can be tuned during implementation.
-
----
-
-## 5.12 Official vs Citizen Discrepancy Detection 🚨
-
-The system compares official/demo facility status with recent citizen reports.
-
-Example:
-
-```text
-Official status:
-✓ Functional
-
-Recent citizen reports:
-
-✕ No water
-✕ Broken flush
-✕ Not functional
-
-        ↓
-
-⚠️ DISCREPANCY DETECTED
-```
-
-Another example:
-
-```text
-Official:
-Maintenance completed
-
-Recent citizen reports:
-✕ Problem still exists
-
-        ↓
-
-⚠️ Re-verification required
-```
-
-This is one of the central features of ToiletTrust.
-
----
-
-## 5.13 Issue and Priority Detection 🔴
-
-The system converts important problems into issues for authorities.
-
-Possible priority factors:
-
-```text
-Repeated negative reports
-Low Trust Score
-High crowd agreement
-Severe problem
-Official/citizen disagreement
-Accessibility-related issue
-Recent evidence
-```
-
-Example:
-
-```text
-Priority Score: 82 / 100
-
-🔴 HIGH PRIORITY
-```
-
-Possible thresholds:
-
-```text
-70–100 → HIGH
-40–69  → MEDIUM
-0–39   → LOW
-```
-
-These thresholds are configurable.
-
----
-
-## 5.14 Authority Dashboard 🏛️
-
-Authorities/admins can view:
-
-- Total facilities
-- Current Trust Scores
-- Low-trust facilities
-- High-priority issues
-- Discrepancies
-- Recent reports
-- Evidence
-- Maintenance status
-- Re-verification requests
-
-Example:
-
-```text
-ADMIN DASHBOARD
-
-Facilities              24
-High Priority            4
-Open Issues              7
-Discrepancies             3
-Recently Verified        12
-```
-
----
-
-## 5.15 Issue Management 🔧
-
-Authorities can manage reported issues.
-
-Example workflow:
-
-```text
-OPEN
-  ↓
-UNDER REVIEW
-  ↓
-MAINTENANCE
-  ↓
-MARKED RESOLVED
-  ↓
-WAITING FOR RE-VERIFICATION
-  ↓
-VERIFIED FIXED
-```
-
-If the problem still exists:
-
-```text
-Re-verification
-      ↓
-Problem still exists
-      ↓
-Issue reopened
-```
-
----
-
-## 5.16 Maintenance Records 🛠️
-
-Authorities can record:
-
-- Maintenance status
-- Date
-- Notes
-- Issue addressed
-- Resolution information
-
-Example:
-
-```text
-Issue:
-No water
-
-Status:
-Maintenance completed
-
-Date:
-16 Aug 2026
-
-Note:
-Water supply restored.
-
-Status:
-Waiting for citizen verification
-```
-
----
-
-## 5.17 Citizen Re-verification 🔄
-
-After an authority marks an issue as repaired, a citizen can verify the facility again.
-
-Flow:
-
-```text
-Issue reported
-      ↓
-Authority repairs
-      ↓
-Maintenance marked completed
-      ↓
-Citizen visits facility
-      ↓
-Location verified
-      ↓
-Citizen re-checks condition
-      ↓
-Problem fixed?
-```
-
-If yes:
-
-```text
-✓ Resolution confirmed
-```
-
-If no:
-
-```text
-✕ Issue still exists
-→ Reopen issue
-```
-
-This closes the loop between reporting and actual resolution.
-
----
-
-# 6. Demo
-
-> **Placeholder:** Add the deployed demo URL.
-
-```text
-Live Demo:
-<DEMO_URL>
-```
-
-## Recommended demo story
-
-The strongest demonstration is a complete real-world scenario:
-
-```text
-1. User opens map
-        ↓
-2. Selects a public toilet
-        ↓
-3. Sees Trust Score = 72
-        ↓
-4. User physically verifies it
-        ↓
-5. Reports "No water"
-        ↓
-6. Adds photo
-        ↓
-7. AI identifies possible issue
-        ↓
-8. Other recent reports agree
-        ↓
-9. Trust Score falls
-        ↓
-10. Official record still says "Functional"
-        ↓
-11. Discrepancy detected
-        ↓
-12. Issue becomes HIGH priority
-        ↓
-13. Authority marks maintenance completed
-        ↓
-14. Citizen re-verifies
-        ↓
-15. Trust Score improves
-```
-
-This demonstrates the complete product rather than isolated screens.
-
-# 7. Screenshots
-
-## Home / Map
-
-`[Screenshot placeholder]`
-
-## Facility Details
-
-`[Screenshot placeholder]`
-
-## Location Verification
-
-`[Screenshot placeholder]`
-
-## Citizen Report
-
-`[Screenshot placeholder]`
-
-## Evidence / AI Analysis
-
-`[Screenshot placeholder]`
-
-## Trust Score Breakdown
-
-`[Screenshot placeholder]`
-
-## Discrepancy Alert
-
-`[Screenshot placeholder]`
-
-## Authority Dashboard
-
-`[Screenshot placeholder]`
-
-## Maintenance
-
-`[Screenshot placeholder]`
-
-## Re-verification
-
-`[Screenshot placeholder]`
-
-# 8. Tech Stack
-
-The project remains intentionally understandable for beginner developers, while the extended deadline allows us to implement the full feature set.
-
-## Frontend
-
-- React
-- Vite
-- JavaScript
-- CSS
-- Leaflet
-
-## Maps
-
-- Leaflet
-- OpenStreetMap
-
-## Location
-
-- Browser Geolocation API
-
-## Evidence Storage
-
-- Selected object/image storage service
-
-> **Placeholder:** Final storage provider.
-
-## AI
-
-- Existing AI vision API
-
-> **Placeholder:** Final AI provider/model.
-
-## Version Control
-
-- Git
-- GitHub
-
-## Deployment
-
-- Vercel or equivalent frontend hosting
-- Node-compatible frontend hosting
-- Managed local/demo data
-- Managed authentication/storage
-
-# 9. Frontend Architecture Overview
-
-```text
-                         USER
-                           |
-                           v
-                 +----------------------+
-                 | React + Vite Frontend|
-                 +----------+-----------+
-                            |
-          +-----------------+------------------+
-          |                 |                  |
-          v                 v                  v
-      Leaflet          Browser GPS       Local Demo Data
-   OpenStreetMap
-          |                 |                  |
-          +-----------------+------------------+
-                            |
-                            v
-                 +----------------------+
-                 | Frontend State / UI  |
-                 | Logic & Components   |
-                 +----------------------+
-                            |
-        +-------------------+-------------------+
-        |                   |                   |
-        v                   v                   v
-   Trust Score        Report / Evidence    Dashboard UI
-   Calculation         UI / Validation     / Maintenance
-```
-
-The application is designed as a frontend-only hackathon demo. Product flows are represented through React components, browser APIs, local/demo data, and client-side logic.
-
-## Frontend request flow: Citizen report
-
-```text
-Citizen
-  ↓
-React Report Form
-  ↓
-Browser gets GPS
-  ↓
-Client-side distance check
-  ↓
-User submits report
-  ↓
-Photo / evidence selected
-  ↓
-Frontend validates input
-  ↓
-Client-side evidence confidence
-  ↓
-Client-side crowd/trust calculation
-  ↓
-UI updates facility state
-```
-
-## Frontend re-verification flow
-
-```text
-Maintenance marked completed in the UI
-        ↓
-Citizen opens facility
-        ↓
-Citizen submits re-verification
-        ↓
-GPS check
-        ↓
-Condition selected
-        ↓
-Frontend updates issue state
-        ↓
-Resolved OR Reopened
-        ↓
-Trust Score UI updated
-```
-
-# 10. Project Structure
-
-```text
-toilet-trust/
-│
-├── frontend/
-│   ├── public/
-│   │
-│   └── src/
-│       ├── components/
-│       │   ├── Navbar.jsx
-│       │   ├── Map.jsx
-│       │   ├── FacilityCard.jsx
-│       │   ├── FacilityStatus.jsx
-│       │   ├── TrustScore.jsx
-│       │   ├── TrustBreakdown.jsx
-│       │   ├── StatusBadge.jsx
-│       │   ├── ReportForm.jsx
-│       │   ├── EvidenceUpload.jsx
-│       │   ├── EvidenceAnalysis.jsx
-│       │   ├── CrowdVerification.jsx
-│       │   ├── DiscrepancyAlert.jsx
-│       │   ├── PriorityBadge.jsx
-│       │   ├── IssueCard.jsx
-│       │   ├── MaintenancePanel.jsx
-│       │   ├── ReverificationForm.jsx
-│       │   └── DashboardCard.jsx
-│       │
-│       ├── pages/
-│       │   ├── Home.jsx
-│       │   ├── FacilityDetails.jsx
-│       │   ├── Report.jsx
-│       │   ├── Login.jsx
-│       │   ├── Profile.jsx
-│       │   └── AdminDashboard.jsx
-│       │
-│       ├── services/
-│       │   ├── map.js
-│       │   ├── storage.js
-│       │   └── demoData.js
-│       │
-│       ├── utils/
-│       │   ├── distance.js
-│       │   ├── formatting.js
-│       │   ├── validation.js
-│       │   └── trustScore.js
-│       │
-│       ├── App.jsx
-│       ├── main.jsx
-│       └── index.css
-│
-├── .gitignore
+toilettrust-frontend/
+├── index.html
 ├── package.json
-└── README.md
+├── .env.example
+├── public/
+│   ├── favicon.svg
+│   └── icons.svg
+└── src/
+    ├── main.jsx              # Mounts <App /> inside BrowserRouter
+    ├── App.jsx                # Routes + auth state
+    ├── index.css              # Design tokens, base styles
+    ├── components/
+    │   ├── Navbar.jsx / .css
+    │   ├── Map.jsx / .css              # Leaflet map + tile layer
+    │   ├── FacilityMarker.jsx          # Trust-colored map pin + popup
+    │   ├── TrustScore.jsx / .css       # Gauge + breakdown (display-only)
+    │   ├── DiscrepancyAlert.jsx / .css # Discrepancy warning / consistent state
+    │   ├── GPSVerification.jsx / .css  # Geolocation + mock backend check
+    │   ├── ReportForm.jsx / .css       # Condition report fields + validation
+    │   ├── PhotoUpload.jsx / .css      # Evidence photo picker/preview
+    │   ├── CrowdAgreement.jsx / .css   # Built, not currently used on any page
+    │   └── PriorityBadge.jsx / .css    # Built, not currently used on any page
+    ├── pages/
+    │   ├── Home.jsx / .css             # Map page
+    │   ├── Login.jsx / .css            # Supabase Auth login/signup
+    │   ├── FacilityDetails.jsx / .css  # Facility info + Trust Score + Discrepancy
+    │   └── ReportFacility.jsx / .css   # GPS → Form → Submit flow
+    └── services/
+        ├── api.js             # getFacilities, getFacility, verifyLocation, submitReport
+        ├── mockData.js        # 7 mock facilities with all display fields
+        └── supabaseClient.js  # Supabase client (safe if env vars are unset)
 ```
 
-# 11. Prerequisites
+## 10. Current Data/API Approach
 
-Expected:
+**The frontend currently uses mock data only.** `src/services/mockData.js` defines a fixed array of 7 sample facilities. `src/services/api.js` wraps that mock data behind four async functions — `getFacilities()`, `getFacility(id)`, `verifyLocation()`, `submitReport()` — with an artificial delay so loading states behave realistically.
 
-- Node.js
-- npm
-- Git
-- GitHub account
-- Modern browser with geolocation support
+Every one of these functions has a commented-out "real version" directly below it showing the intended `fetch()` call once a backend exists. No other file in the app imports mock data directly — only `api.js` does — so swapping mock data for real API calls should only require editing `api.js`.
 
-# 12. Installation
+## 11. Authentication
 
-Clone the repository:
+Authentication uses **Supabase Auth**, implemented in `src/services/supabaseClient.js` and `src/pages/Login.jsx`.
+
+- If `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set, the Login page performs real `signInWithPassword` / `signUp` calls against Supabase.
+- If those env vars are **not** set, `isSupabaseConfigured` is `false`, the Supabase client is `null`, and the Login page shows a notice instead of crashing — the form will display an error on submit rather than calling Supabase.
+- There is currently no route protection — all pages are accessible whether or not a user is logged in.
+
+## 12. Map and Location
+
+- **Map library:** Leaflet, via `react-leaflet`.
+- **Map provider:** OpenStreetMap tiles.
+- **Markers:** one per mock facility, color-coded by trust band (green/amber/red based on `trust_score`). Clicking a marker opens a popup with name, score, status, and a "View Details" link.
+- **Geolocation:** `GPSVerification.jsx` calls the browser's `navigator.geolocation.getCurrentPosition()` to get the user's coordinates.
+- **Distance validation:** **not implemented in the frontend.** The raw coordinates are sent to a mocked `verifyLocation()` function in `api.js`, which randomly returns verified/not-verified. The actual 100m radius check is intended to happen on the backend — the frontend never calculates distance.
+
+## 13. Reporting
+
+The report form (`ReportForm.jsx`) currently collects:
+
+- **Functionality** — Working / Partially working / Not working (required)
+- **Water** — Available / Not available (required)
+- **Cleanliness** — Excellent / Good / Average / Poor / Very Poor (required)
+- **Other issue** — optional free-text (max 300 characters)
+- **Evidence photo** — optional (JPG/PNG/WEBP, max 5MB, via `PhotoUpload.jsx`)
+
+Validation blocks submission if any required field is missing, showing inline error text.
+
+**Submission is currently mocked.** `submitReport()` in `api.js` waits ~900ms and then succeeds about 90% of the time (fails the rest, so both outcomes are demoable). No data is actually sent anywhere or persisted — nothing is uploaded to Cloudinary or any backend yet.
+
+## 14. Trust Score
+
+`TrustScore.jsx` displays a numeric score (0–100) as a ring gauge plus a 5-part breakdown (Recent reports, Evidence confidence, Crowd agreement, Official consistency, Freshness), each shown as a `score/max` bar.
+
+**The frontend does not calculate the Trust Score or its breakdown.** Both the overall score and every breakdown value are fixed fields on the mock facility objects in `mockData.js`. The component only renders whatever numbers it's given as props.
+
+## 15. Discrepancy Detection
+
+`DiscrepancyAlert.jsx` renders one of two states based on a `discrepancy` boolean:
+
+- **`discrepancy: true`** — a warning card showing "Official records" vs. "Recent citizen reports" side by side, plus a reason string
+- **`discrepancy: false`** — a quiet "Information Consistent" card
+
+**The frontend does not determine whether a discrepancy exists.** `discrepancy`, `official_status`, `citizen_status`, and `discrepancy_reason` are all fixed fields on the mock facility data. No threshold logic, report counting, or official/citizen comparison exists in the React code — that logic is intended to live entirely on the backend.
+
+## 16. Setup and Installation
+
+**Prerequisites:** Node.js (a recent LTS version) and npm.
 
 ```bash
-git clone <REPOSITORY_URL>
-cd toilet-trust
-```
-
-Install frontend dependencies:
-
-```bash
-cd frontend
+# Install dependencies
 npm install
-```
 
-# 13. Frontend Setup
-
-The application is designed to run entirely on the frontend.
-
-No frontend server, local/demo data local demo data, or frontend API configuration is required.
-
-For demo functionality, the application can use local/demo facility data and client-side state.
-
-# 14. How to Run Frontend
-
-```bash
-cd frontend
-npm install
+# Start the dev server
 npm run dev
 ```
 
-The application runs as a React + Vite frontend.
+Then open the local URL Vite prints (typically `http://localhost:5173`).
 
-# 19. Deployment
+## 17. Environment Variables
 
-The frontend can be deployed to Vercel or any equivalent static/frontend hosting platform.
+Referenced in the current code (see `.env.example`):
 
-```text
-                        GitHub
-                           |
-                           v
-                    React + Vite
-                      Frontend
-                           |
-                           v
-                 Static/Web Hosting
+| Variable | Used in | Status |
+|---|---|---|
+| `VITE_SUPABASE_URL` | `src/services/supabaseClient.js` | Actively used — required for real Supabase Auth |
+| `VITE_SUPABASE_ANON_KEY` | `src/services/supabaseClient.js` | Actively used — required for real Supabase Auth |
+| `VITE_API_URL` | `src/services/api.js` (comments only) | **Not yet used at runtime** — only appears in commented-out example code for the future real API calls |
+
+None of these have real values checked into the repo. Copy `.env.example` to `.env` and fill in your own Supabase project's URL/key if you want live login to work; the app runs fine without them (Login just shows a configuration notice).
+
+## 18. Development
+
+```bash
+npm run dev       # Start the Vite dev server with hot reload
+npm run build      # Production build (verified working)
+npm run preview    # Preview the production build locally
+npm run lint        # Run oxlint
 ```
 
-No frontend deployment or local demo data hosting is required for the frontend-only demo.
+## 19. Current Limitations
 
-# 20. Future Improvements
+- **No backend is connected.** All facility, trust, crowd, discrepancy, and priority data is hardcoded mock data in `mockData.js`.
+- **Report submission is mocked** — no data is persisted or sent anywhere; success/failure is randomized client-side to demo both states.
+- **GPS verification is mocked** — the app reads the real device location, but whether it counts as "verified" is a random mock result, not a real distance check.
+- **Photo upload does not send files anywhere.** It handles file selection, preview, and validation only. Cloudinary is not integrated.
+- **Trust Score and breakdown values are mock data**, not calculated by any logic in this repo.
+- **Discrepancy results are mock data**, not determined by any logic in this repo.
+- **Crowd Agreement and Priority Score components exist in the codebase but are not currently displayed** on any page.
+- **No route protection** — pages are accessible regardless of login state.
+- **Gemini is not integrated anywhere in the frontend.**
 
-After the hackathon, the product could be extended with:
+## 20. Backend Integration
 
-- Trusted reporter reputation
-- Advanced image similarity
-- Better AI evidence analysis
-- AI-generated report summaries
-- Push notifications
-- SMS notifications
-- Real municipal/government APIs
-- Live municipal maintenance systems
-- Advanced accessibility information
-- Historical Trust Score graphs
-- Predictive maintenance
-- More advanced geospatial search
-- Nationwide facility coverage
-- Offline reporting
-- Multi-language support
-- Public sanitation analytics
+This frontend is being built independently while a teammate develops the backend separately. It's structured around a single service layer (`src/services/api.js`) specifically so the current mock data can be swapped for real backend calls later without changing any page or component code. No backend API endpoints have been assumed or hardcoded beyond the illustrative examples left as comments in `api.js`.
 
-# 21. Team Members
+## 21. Future Improvements
 
-> **Placeholder — add actual team information.**
+Planned but **not yet implemented**:
 
-| Name | Role |
-|---|---|
-| `<TEAM MEMBER 1>` | `<ROLE>` |
-| `<TEAM MEMBER 2>` | `<ROLE>` |
+- Connecting `api.js` to the real backend once it's available
+- Displaying Crowd Agreement and Priority Score on the Facility Details page (components already built)
+- Real photo upload to Cloudinary
+- Real GPS distance verification via the backend
+- AI-assisted evidence analysis (Gemini)
+- Authority/admin dashboard
+- Maintenance status workflow and re-verification flow
+- Route protection based on auth state
 
----
+## 22. Team
 
-# Development Priority
-
-Because the deadline has been extended to **6:00 PM on 16 August**, the project is no longer restricted to a minimal feature set.
-
-The team should implement the **full planned feature set**, while still keeping the underlying engineering understandable.
-
-## Priority 1 — Foundation
-
-```text
-React + Vite
-JavaScript
-CSS
-Leaflet
-OpenStreetMap
-GitHub
-```
-
-## Priority 2 — Main Citizen Experience
-
-```text
-Map
- ↓
-Facility Details
- ↓
-GPS Verification
- ↓
-Report
- ↓
-Photo Evidence
-```
-
-## Priority 3 — Intelligence Layer
-
-```text
-Evidence Confidence
- ↓
-Crowd Verification
- ↓
-Trust Score
- ↓
-Freshness
- ↓
-Discrepancy Detection
- ↓
-Priority Score
-```
-
-## Priority 4 — Authority Experience
-
-```text
-Admin Dashboard
- ↓
-Issue Management
- ↓
-Maintenance
- ↓
-Resolution
-```
-
-## Priority 5 — Closed-Loop Verification
-
-```text
-Maintenance Completed
- ↓
-Citizen Re-verification
- ↓
-Issue Resolved / Reopened
- ↓
-Trust Score Updated
-```
-
-## Priority 6 — AI and Polish
-
-```text
-AI Evidence Analysis
- ↓
-Duplicate Detection
- ↓
-Better UI
- ↓
-Loading/Error states
- ↓
-Demo polish
-```
-
----
-
-# Implementation Philosophy
-
-The project is intentionally implemented as a frontend-only hackathon experience.
-
-The guiding principle is:
-
-> **Build the complete product experience with the simplest reliable frontend technology.**
-
-We intentionally avoid:
-
-- A custom frontend server
-- Local Demo Data infrastructure
-- Microservices
-- Complex authentication infrastructure
-- Continuous location tracking
-- Custom AI model training
-- Unnecessary infrastructure
-
-We use:
-
-- React + Vite
-- Browser Geolocation API
-- Leaflet + OpenStreetMap
-- Client-side validation
-- Local/demo data
-- Explainable client-side formulas
-- Simple image/evidence handling
-- Responsive UI components
-
-The goal is to demonstrate the complete ToiletTrust user experience without requiring frontend infrastructure.
-
-# Core Product Loop
-
-The complete product loop is:
-
-```text
-                 ┌───────────────┐
-                 │ Find Facility │
-                 └───────┬───────┘
-                         ↓
-                 ┌───────────────┐
-                 │ Verify Nearby │
-                 └───────┬───────┘
-                         ↓
-                 ┌───────────────┐
-                 │ Submit Report │
-                 └───────┬───────┘
-                         ↓
-                 ┌───────────────┐
-                 │    Evidence   │
-                 └───────┬───────┘
-                         ↓
-              ┌──────────┴──────────┐
-              ↓                     ↓
-       Crowd Verification      AI Analysis
-              └──────────┬──────────┘
-                         ↓
-                 ┌───────────────┐
-                 │  Trust Score  │
-                 └───────┬───────┘
-                         ↓
-                 ┌───────────────┐
-                 │ Discrepancy?  │
-                 └───────┬───────┘
-                         ↓
-                 ┌───────────────┐
-                 │ Issue/Priority│
-                 └───────┬───────┘
-                         ↓
-                 ┌───────────────┐
-                 │  Maintenance  │
-                 └───────┬───────┘
-                         ↓
-                 ┌───────────────┐
-                 │ Re-verification│
-                 └───────┬───────┘
-                         ↓
-                 ┌───────────────┐
-                 │ Updated Trust │
-                 │     Score     │
-                 └───────────────┘
-```
-
-This is the **full feature set** we intend to build for the hackathon.
-
----
-
-# Demo Dataset
-
-The MVP/demo should use a small, clearly labelled set of public toilet facilities and maintenance records.
-
-The dataset should intentionally contain different states, for example:
-
-```text
-Facility A → Healthy / High Trust
-Facility B → Low water availability
-Facility C → Official/citizen discrepancy
-Facility D → Maintenance completed / awaiting verification
-Facility E → Multiple conflicting reports
-```
-
-This allows the judges to see the important features without requiring nationwide real-world data.
-
-> **Placeholder:** Add final facilities and locations once selected.
-
-# License
-
-> **Placeholder:** Add the project's license if one is selected.
+- [Team Member 1] Snehansh Tripathy
+- [Team Member 2] Utsav Kumar
